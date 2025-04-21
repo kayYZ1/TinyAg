@@ -66,33 +66,58 @@ class Agent implements IAgent {
 			if (!completion || !completion.choices || !completion.choices[0]) {
 				return {
 					role: "assistant",
-					refusal: "API call error",
+					refusal: "Api error",
 					content: "Sorry, I encountered an error processing your request.\n",
 				};
 			}
 
 			const message = completion.choices[0].message;
+
 			if (message.tool_calls && message.tool_calls.length > 0) {
-				for (const toolCall of message.tool_calls) {
+				const toolCalls = message.tool_calls;
+				const toolPromises = toolCalls.map(async (toolCall) => {
 					const tool = tools.find((t) => t.name === toolCall.function.name);
 					if (tool) {
-						const args = JSON.parse(toolCall.function.arguments);
-						const result = await tool.execute(args);
-						conversation.push({
-							role: "tool",
-							content: JSON.stringify({ result }),
-							tool_call_id: toolCall.id,
-						});
+						try {
+							const args = JSON.parse(toolCall.function.arguments);
+							const result = await tool.execute(args);
+							return {
+								role: "tool" as const,
+								content: JSON.stringify({ result }),
+								tool_call_id: toolCall.id,
+							};
+						} catch (error) {
+							return {
+								role: "tool" as const,
+								content: JSON.stringify({
+									result: `Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
+								}),
+								tool_call_id: toolCall.id,
+							};
+						}
 					}
-				}
+					return null;
+				});
+
+				// Wait for all tool executions to complete
+				const toolResponses = (await Promise.all(toolPromises)).filter(
+					Boolean,
+				) as ChatCompletionMessageParam[];
+
+				conversation.push(message); 
+				toolResponses.forEach((response) => {
+					if (response) conversation.push(response);
+				});
 
 				return await this.runInference(conversation, tools);
 			}
+
 			return message;
 		} catch (error) {
+			console.error("API call error:", error);
 			return {
 				role: "assistant",
-				refusal: "API call error",
+				refusal: "Api error",
 				content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : String(error)}\n`,
 			};
 		}
