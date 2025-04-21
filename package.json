@@ -1,0 +1,16 @@
+{
+	"name": "tinyag",
+	"module": "index.ts",
+	"type": "module",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"chalk": "^5.4.1",
+		"openai": "^4.95.1"
+	}
+}
