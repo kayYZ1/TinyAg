@@ -3,6 +3,8 @@ import { createInterface } from "readline";
 
 import Agent from "./agent";
 import ReadFileTool from "./tools/read_file";
+import ListFilesTool from "./tools/list_files";
+import EditFileTool from "./tools/edit_file";
 
 const getUserMessage = () => {
 	const rl = createInterface({
@@ -25,7 +27,7 @@ const main = async () => {
 		apiKey: process.env["OPENROUTER_API_KEY"],
 	});
 
-	const tools = [new ReadFileTool()];
+	const tools = [new ReadFileTool(), new ListFilesTool(), new EditFileTool()];
 	const agent = new Agent(client, getUserMessage, tools);
 
 	await agent.Run();
