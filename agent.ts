@@ -2,7 +2,7 @@ import chalk from "chalk";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources.mjs";
 
-import type { ITool } from "./interfaces";
+import type { ITool } from "./lib/interfaces";
 
 interface IAgent {
 	client: OpenAI;
@@ -25,7 +25,7 @@ class Agent implements IAgent {
 		this.tools = tools;
 	}
 
-	Run = async () => {
+	async Run() {
 		const conversation: ChatCompletionMessageParam[] = [];
 		process.stdout.write(chalk.red("Chat with TinyAg (ctrl+c to quit)\n"));
 
@@ -40,18 +40,18 @@ class Agent implements IAgent {
 			conversation.push({ role: "user", content: userMessage });
 			const response = await this.runInference(conversation, this.tools);
 
-			process.stdout.write(chalk.green("TinyAg: ") + response.content);
+			process.stdout.write(chalk.green("TinyAg: ") + response.content + "\n");
 			conversation.push({ role: "assistant", content: response.content });
 		}
-	};
+	}
 
-	runInference = async (
+	async runInference(
 		conversation: ChatCompletionMessageParam[],
 		tools: ITool[],
-	): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> => {
+	): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> {
 		try {
 			const completion = await this.client.chat.completions.create({
-				model: "google/gemini-2.0-flash-exp:free",
+				model: "mistralai/mistral-small-3.1-24b-instruct:free",
 				messages: conversation,
 				tools: tools.map((tool) => ({
 					type: "function",
@@ -104,9 +104,11 @@ class Agent implements IAgent {
 					Boolean,
 				) as ChatCompletionMessageParam[];
 
-				conversation.push(message); 
+				conversation.push(message);
 				toolResponses.forEach((response) => {
-					if (response) conversation.push(response);
+					if (response) {
+						conversation.push(response);
+					}
 				});
 
 				return await this.runInference(conversation, tools);
@@ -121,7 +123,7 @@ class Agent implements IAgent {
 				content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : String(error)}\n`,
 			};
 		}
-	};
+	}
 }
 
 export default Agent;

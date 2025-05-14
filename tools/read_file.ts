@@ -1,4 +1,4 @@
-import type { ITool } from "../interfaces";
+import type { ITool } from "../lib/interfaces";
 
 class ReadFileTool implements ITool {
 	name = "read_file";
@@ -15,9 +15,9 @@ class ReadFileTool implements ITool {
 		required: ["filename"],
 	};
 
-	execute = async (args: Record<string, unknown>) => {
+	async execute(args: Record<string, unknown>) {
 		const filePath =
-			typeof args["filename"] === "string" ? args["filename"] : "";
+			typeof args["filename"] === "string" ? args["filename"] : null;
 
 		if (!filePath) {
 			return "Error(read_file): No file path provided";
@@ -29,7 +29,7 @@ class ReadFileTool implements ITool {
 		} catch (error) {
 			return `Error reading file: ${error}`;
 		}
-	};
+	}
 }
 
 export default ReadFileTool;
