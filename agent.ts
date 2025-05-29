@@ -51,7 +51,7 @@ class Agent implements IAgent {
 	): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> {
 		try {
 			const completion = await this.client.chat.completions.create({
-				model: "mistralai/mistral-small-3.1-24b-instruct:free",
+				model: "meta-llama/llama-4-maverick:free",
 				messages: conversation,
 				tools: tools.map((tool) => ({
 					type: "function",
@@ -61,9 +61,11 @@ class Agent implements IAgent {
 						parameters: tool.parameters,
 					},
 				})),
+				tool_choice: "auto",
 			});
 
 			if (!completion || !completion.choices || !completion.choices[0]) {
+				console.log(completion);
 				return {
 					role: "assistant",
 					refusal: "Api error",
@@ -74,24 +76,39 @@ class Agent implements IAgent {
 			const message = completion.choices[0].message;
 
 			if (message.tool_calls && message.tool_calls.length > 0) {
+				console.log(
+					chalk.yellow("Tool calls detected:"),
+					message.tool_calls.length,
+				);
 				const toolCalls = message.tool_calls;
 				const toolPromises = toolCalls.map(async (toolCall) => {
+					console.log(
+						chalk.yellow(`Processing tool call: ${toolCall.function.name}`),
+					);
 					const tool = tools.find((t) => t.name === toolCall.function.name);
 					if (tool) {
 						try {
 							const args = JSON.parse(toolCall.function.arguments);
+							console.log(
+								chalk.yellow(`Executing tool ${tool.name} with args:`),
+								args,
+							);
+
 							const result = await tool.execute(args);
+							console.log(
+								chalk.yellow(`Tool ${tool.name} result:\n`),
+								result.substring(0, 100) + (result.length > 100 ? "..." : ""),
+							);
+
 							return {
 								role: "tool" as const,
-								content: JSON.stringify({ result }),
+								content: result,
 								tool_call_id: toolCall.id,
 							};
 						} catch (error) {
 							return {
 								role: "tool" as const,
-								content: JSON.stringify({
-									result: `Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
-								}),
+								content: `Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
 								tool_call_id: toolCall.id,
 							};
 						}
@@ -103,17 +120,37 @@ class Agent implements IAgent {
 				const toolResponses = (await Promise.all(toolPromises)).filter(
 					Boolean,
 				) as ChatCompletionMessageParam[];
+				console.log(chalk.yellow(`Got ${toolResponses.length} tool responses`));
+				console.log(chalk.blue("Adding assistant message to conversation"));
+				console.log("Model message: ", message.content);
 
 				conversation.push(message);
 				toolResponses.forEach((response) => {
 					if (response) {
+						// Using type assertion to access tool_call_id
+						const toolResponse = response as { tool_call_id?: string };
+						if (toolResponse.tool_call_id) {
+							console.log(
+								chalk.blue(
+									`Adding tool response for tool_call_id: ${toolResponse.tool_call_id}`,
+								),
+							);
+						}
 						conversation.push(response);
 					}
 				});
 
+				console.log(
+					chalk.magenta(
+						"Making recursive call to runInference with updated conversation",
+					),
+				);
+				console.log(
+					chalk.magenta(`Conversation now has ${conversation.length} messages`),
+				);
+
 				return await this.runInference(conversation, tools);
 			}
-
 			return message;
 		} catch (error) {
 			console.error("API call error:", error);
