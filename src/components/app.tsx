@@ -43,11 +43,9 @@ export const App = ({ agent }: { agent: Agent }) => {
 					content: `Error: ${error instanceof Error ? error.message : String(error)}`,
 				};
 				setConversation((prev) => [...prev, errorMessage]);
-			}
-			finally {
+			} finally {
 				setIsPending(false);
 			}
-
 		},
 		[agent, conversation],
 	);
@@ -59,9 +57,7 @@ export const App = ({ agent }: { agent: Agent }) => {
 			{isPending ? (
 				<Box gap={1} alignItems="flex-start">
 					<ToggleSpinner />
-					<Text>
-						Thinking of response
-					</Text>
+					<Text>Crunching the numbers...</Text>
 				</Box>
 			) : (
 				<ChatInput input={input} setInput={setInput} onSubmit={handleSubmit} />

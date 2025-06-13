@@ -8,7 +8,7 @@ const Header = () => (
 					TinyAg
 				</Text>
 				<Text> - Chat with your AI agent </Text>
-				<Text color="gray">(Ctrl+C to quit, Tab to focus input)</Text>
+				<Text color="gray">(Ctrl+C to quit)</Text>
 			</Text>
 		</Box>
 		<Box marginTop={1} flexDirection="column">

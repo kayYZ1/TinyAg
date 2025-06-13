@@ -11,9 +11,12 @@ const ChatInput = ({
 	setInput: (value: string) => void;
 	onSubmit: (value: string) => void;
 }) => {
-	const handleChange = useCallback((value: string) => {
-		setInput(value);
-	}, [setInput]);
+	const handleChange = useCallback(
+		(value: string) => {
+			setInput(value);
+		},
+		[setInput],
+	);
 
 	return (
 		<Box borderStyle="single">
