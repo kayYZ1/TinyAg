@@ -1,16 +1,24 @@
 {
 	"name": "tinyag",
-	"module": "index.ts",
+	"module": "src/index.tsx",
 	"type": "module",
+	"scripts": {
+		"build": "bun build src/index.tsx --outdir dist --target bun --external 'react-devtools-core'",
+		"start": "bun run dist/index.js"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@types/react": "^19.1.6"
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
-		"chalk": "^5.4.1",
-		"openai": "^4.95.1"
+		"ink": "^6.0.0",
+		"ink-text-input": "^6.0.0",
+		"openai": "^4.95.1",
+		"react": "^19.1.0",
+		"react-devtools-core": "^6.1.2"
 	}
 }
