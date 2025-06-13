@@ -20,7 +20,9 @@ const Header = () => (
    ██║   ██║██║ ╚████║   ██║   ██║  ██║╚██████╔╝
    ╚═╝   ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝`}
 			</Text>
-			<Text strikethrough>(Definitely not Claude code knock off)</Text>
+			<Box paddingLeft={4}>
+				<Text strikethrough>(Definitely not Claude code knock off)</Text>
+			</Box>
 		</Box>
 	</Box>
 );

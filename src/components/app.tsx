@@ -1,4 +1,4 @@
-import { useState, useTransition, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Box, Text } from "ink";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
@@ -6,13 +6,14 @@ import Agent from "../agent";
 import Header from "./header";
 import Message from "./message";
 import ChatInput from "./chat-input";
+import ToggleSpinner from "./spinner";
 
 export const App = ({ agent }: { agent: Agent }) => {
 	const [conversation, setConversation] = useState<
 		ChatCompletionMessageParam[]
 	>([]);
 	const [input, setInput] = useState("");
-	const [isPending, startTransition] = useTransition();
+	const [isPending, setIsPending] = useState(false);
 
 	const handleSubmit = useCallback(
 		async (text: string) => {
@@ -28,26 +29,25 @@ export const App = ({ agent }: { agent: Agent }) => {
 			setConversation((prev) => [...prev, newMessage]);
 			setInput("");
 
-			startTransition(() => {
-				const runInference = async () => {
-					try {
-						const response = await agent.runInference(
-							[...conversation, newMessage],
-							agent.tools,
-						);
+			try {
+				setIsPending(true);
+				const response = await agent.runInference(
+					[...conversation, newMessage],
+					agent.tools,
+				);
 
-						setConversation((prev) => [...prev, response]);
-					} catch (error) {
-						const errorMessage: ChatCompletionMessageParam = {
-							role: "assistant",
-							content: `Error: ${error instanceof Error ? error.message : String(error)}`,
-						};
-						setConversation((prev) => [...prev, errorMessage]);
-					}
+				setConversation((prev) => [...prev, response]);
+			} catch (error) {
+				const errorMessage: ChatCompletionMessageParam = {
+					role: "assistant",
+					content: `Error: ${error instanceof Error ? error.message : String(error)}`,
 				};
+				setConversation((prev) => [...prev, errorMessage]);
+			}
+			finally {
+				setIsPending(false);
+			}
 
-				runInference();
-			});
 		},
 		[agent, conversation],
 	);
@@ -57,8 +57,11 @@ export const App = ({ agent }: { agent: Agent }) => {
 			<Header />
 			{conversation.map((msg, index) => Message(msg, index))}
 			{isPending ? (
-				<Box>
-					<Text color="yellow">TinyAg is thinking...</Text>
+				<Box gap={1} alignItems="flex-start">
+					<ToggleSpinner />
+					<Text>
+						Thinking of response
+					</Text>
 				</Box>
 			) : (
 				<ChatInput input={input} setInput={setInput} onSubmit={handleSubmit} />

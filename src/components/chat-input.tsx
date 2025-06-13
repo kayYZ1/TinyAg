@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Box } from "ink";
 import TextInput from "ink-text-input";
 
@@ -9,18 +10,24 @@ const ChatInput = ({
 	input: string;
 	setInput: (value: string) => void;
 	onSubmit: (value: string) => void;
-}) => (
-	<Box borderStyle="single">
-		<Box flexGrow={1} paddingX={1}>
-			<TextInput
-				value={input}
-				onChange={setInput}
-				onSubmit={onSubmit}
-				placeholder="Are dolphins evil?"
-				showCursor={true}
-			/>
+}) => {
+	const handleChange = useCallback((value: string) => {
+		setInput(value);
+	}, [setInput]);
+
+	return (
+		<Box borderStyle="single">
+			<Box flexGrow={1} paddingX={1}>
+				<TextInput
+					value={input}
+					onChange={handleChange}
+					onSubmit={onSubmit}
+					placeholder="Are dolphins evil?"
+					showCursor={false}
+				/>
+			</Box>
 		</Box>
-	</Box>
-);
+	);
+};
 
 export default ChatInput;
