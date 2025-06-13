@@ -12,10 +12,7 @@ class Agent implements IAgent {
 	client: OpenAI;
 	tools: ITool[];
 
-	constructor(
-		client: OpenAI,
-		tools: ITool[],
-	) {
+	constructor(client: OpenAI, tools: ITool[]) {
 		this.client = client;
 		this.tools = tools;
 	}
@@ -100,4 +97,4 @@ class Agent implements IAgent {
 	}
 }
 
-export default Agent; 
+export default Agent;

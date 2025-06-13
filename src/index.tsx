@@ -10,7 +10,9 @@ import { App } from "./components/app";
 
 const main = async () => {
 	if (!process.env["OPENROUTER_API_KEY"]) {
-		console.error("No API key provided. Make sure to include one with export OPENROUTER_API_KEY=your_key");
+		console.error(
+			"No API key provided. Make sure to include one with export OPENROUTER_API_KEY=your_key",
+		);
 		return;
 	}
 
