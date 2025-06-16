@@ -6,15 +6,26 @@ import type { ITool } from "../lib/interfaces";
 interface IAgent {
 	client: OpenAI;
 	tools: ITool[];
+	model: string;
 }
 
 class Agent implements IAgent {
 	client: OpenAI;
 	tools: ITool[];
+	model: string;
 
-	constructor(client: OpenAI, tools: ITool[]) {
+	constructor(
+		client: OpenAI,
+		tools: ITool[],
+		model: string = "deepseek/deepseek-chat-v3-0324:free",
+	) {
 		this.client = client;
 		this.tools = tools;
+		this.model = model;
+	}
+
+	setModel(model: string) {
+		this.model = model;
 	}
 
 	async runInference(
@@ -23,7 +34,7 @@ class Agent implements IAgent {
 	): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> {
 		try {
 			const completion = await this.client.chat.completions.create({
-				model: "deepseek/deepseek-chat-v3-0324:free",
+				model: this.model,
 				messages: conversation,
 				tools: tools.map((tool) => ({
 					type: "function",

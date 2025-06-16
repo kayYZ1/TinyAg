@@ -19,14 +19,14 @@ const ChatInput = ({
 	);
 
 	return (
-		<Box borderStyle="single">
-			<Box flexGrow={1} paddingX={1}>
+		<Box borderStyle="double" width="100%">
+			<Box paddingX={1}>
 				<TextInput
 					value={input}
 					onChange={handleChange}
 					onSubmit={onSubmit}
 					placeholder="Are dolphins evil?"
-					showCursor={false}
+					showCursor={true}
 				/>
 			</Box>
 		</Box>
